@@ -33,7 +33,8 @@ public abstract class CheckedServiceException extends Exception implements SafeL
     private final String noArgsMessage;
 
     /**
-     * Creates a new exception for the given error.
+     * Creates a new exception for the given error. All {@link com.palantir.logsafe.Arg parameters} are propagated to
+     * clients.
      */
     public CheckedServiceException(ErrorType errorType, Arg<?>... parameters) {
         this(errorType, null, parameters);

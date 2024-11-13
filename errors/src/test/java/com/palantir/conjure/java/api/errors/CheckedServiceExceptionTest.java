@@ -30,16 +30,6 @@ public final class CheckedServiceExceptionTest {
     private static final ErrorType ERROR = ErrorType.create(ErrorType.Code.CUSTOM_CLIENT, ERROR_NAME);
     private static final String EXPECTED_ERROR_MSG = "CheckedServiceException: CUSTOM_CLIENT (Namespace:MyDesc)";
 
-    private static class TestCheckedServiceException extends CheckedServiceException {
-        TestCheckedServiceException(ErrorType errorType, Arg<?>... parameters) {
-            super(errorType, parameters);
-        }
-
-        TestCheckedServiceException(ErrorType errorType, Throwable cause, Arg<?>... parameters) {
-            super(errorType, cause, parameters);
-        }
-    }
-
     @Test
     public void testExceptionMessageContainsNoArgs_safeLogMessageContainsSafeArgsOnly() {
         Arg<?>[] args = {SafeArg.of("arg1", "foo"), UnsafeArg.of("arg2", 2), UnsafeArg.of("arg3", null)};
@@ -102,6 +92,14 @@ public final class CheckedServiceExceptionTest {
     @Test
     public void testErrorIdsAreInheritedFromCheckedServiceExceptions() {
         CheckedServiceException rootCause = new TestCheckedServiceException(ERROR);
+        SafeRuntimeException intermediate = new SafeRuntimeException("Handled an exception", rootCause);
+        CheckedServiceException parent = new TestCheckedServiceException(ERROR, intermediate);
+        assertThat(parent.getErrorInstanceId()).isEqualTo(rootCause.getErrorInstanceId());
+    }
+
+    @Test
+    public void testErrorIdsAreInheritedFromServiceExceptions() {
+        ServiceException rootCause = new ServiceException(ERROR);
         SafeRuntimeException intermediate = new SafeRuntimeException("Handled an exception", rootCause);
         CheckedServiceException parent = new TestCheckedServiceException(ERROR, intermediate);
         assertThat(parent.getErrorInstanceId()).isEqualTo(rootCause.getErrorInstanceId());

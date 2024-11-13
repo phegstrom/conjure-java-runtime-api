@@ -96,6 +96,14 @@ public final class ServiceExceptionTest {
     }
 
     @Test
+    public void testErrorIdsAreInheritedFromCheckedServiceExceptions() {
+        CheckedServiceException rootCause = new TestCheckedServiceException(ERROR);
+        SafeRuntimeException intermediate = new SafeRuntimeException("Handled an exception", rootCause);
+        ServiceException parent = new ServiceException(ERROR, intermediate);
+        assertThat(parent.getErrorInstanceId()).isEqualTo(rootCause.getErrorInstanceId());
+    }
+
+    @Test
     public void testErrorIdsAreInheritedFromRemoteExceptions() {
         RemoteException rootCause = new RemoteException(
                 new SerializableError.Builder()
